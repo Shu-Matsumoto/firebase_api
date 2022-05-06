@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>google books API</h1>
+    <input type="text" id="textboxSearchCondition" />
+    <button id="btnSearch">データ取得</button>
+    <div id="output"></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- axiosライブラリの読み込み -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      //import { initializeApp } from "firebase/app";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
+      //import { getAnalytics } from "firebase/analytics";
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      //const analytics = getAnalytics(app);
+    </script>
+    <script>
+      $("#btnSearch").on("click", () => {
+        const textBoxValue = $("#textboxSearchCondition").val();
+        // リクエストを送るurlを準備
+        const requestUrlForBookSearch =
+          "https://www.googleapis.com/books/v1/volumes?q=intitle:" +
+          textBoxValue;
+        axios
+          .get(requestUrlForBookSearch)
+          .then(function (response) {
+            // リクエスト成功時の処理（responseに結果が入っている）
+            console.log(response.data.items);
+
+            // foreach
+            let booksArray = [];
+            response.data.items.forEach((book) => {
+              booksArray.push("<p>" + book.volumeInfo.title + "</p>");
+
+              let requestUrlForFirebaseApi =
+                "https://us-central1-firestoreandfunctions.cloudfunctions.net/addMessage?text=" +
+                book.volumeInfo.title;
+
+              axios
+                .get(requestUrlForFirebaseApi)
+                .then(function (responseFirebase) {
+                  // リクエスト成功時の処理（responseに結果が入っている）
+                  console.log(responseFirebase);
+                })
+                .catch(function (errorFirebase) {
+                  // リクエスト失敗時の処理（errorにエラー内容が入っている）
+                  console.log(errorFirebase);
+                })
+                .finally(function () {});
+            });
+
+            $("#output").html(booksArray);
+          })
+          .catch(function (error) {
+            // リクエスト失敗時の処理（errorにエラー内容が入っている）
+            console.log(error);
+          })
+          .finally(function () {
+            // 成功失敗に関わらず必ず実行
+            console.log("done!");
+          });
+      });
+    </script>
+  </body>
+</html>
