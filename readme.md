@@ -1,6 +1,6 @@
 # プロダクトのタイトル
 
-- デプロイ先の URL:
+- デプロイ先の URL:https://shu-matsumoto.github.io/firebase_api/
 
 ## プロダクトの紹介
 
